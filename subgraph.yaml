@@ -1,0 +1,92 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: cmUMAMI
+    network: arbitrum-one
+    source:
+      address: "0x1922C36F3bc762Ca300b4a46bB2102F84B1684aB"
+      abi: cmUMAMI
+      startBlock: 8637816
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - PpsEntity
+        - SupplyBreakdown
+      abis:
+        - name: cmUMAMI
+          file: ./abis/cmUMAMI.json
+        - name: mUMAMI
+          file: ./abis/mUMAMI.json
+        - name: UMAMI
+          file: ./abis/UMAMI.json
+        - name: sUMAMI
+          file: ./abis/sUMAMI.json
+      eventHandlers:
+        - event: Reinvest(uint256,uint256)
+          handler: handleReinvest
+        - event: Deposit(indexed address,uint256)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,uint256)
+          handler: handleWithdraw
+      file: ./src/cm-umami.ts
+  - kind: ethereum
+    name: marinateReceiver
+    network: arbitrum-one
+    source:
+      address: "0x9491300D42f9b1929DF4c1A3308F68A482B91A30"
+      abi: marinateReceiver
+      startBlock: 7670244
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - EthDistribution
+        - SupplyBreakdown
+      abis:
+        - name: marinateReceiver
+          file: ./abis/marinateReceiver.json
+        - name: cmUMAMI
+          file: ./abis/cmUMAMI.json
+        - name: UMAMI
+          file: ./abis/UMAMI.json
+        - name: mUMAMI
+          file: ./abis/mUMAMI.json
+        - name: sUMAMI
+          file: ./abis/sUMAMI.json
+      eventHandlers:
+        - event: RewardAdded(address,uint256)
+          handler: handleRewardAdded
+      file: ./src/marinate-receiver.ts
+  - kind: ethereum
+    name: mUMAMI
+    network: arbitrum-one
+    source:
+      address: "0x2AdAbD6E8Ce3e82f52d9998a7f64a90d294A92A4"
+      abi: mUMAMI
+      startBlock: 7069933
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - SupplyBreakdown
+      abis:
+        - name: mUMAMI
+          file: ./abis/mUMAMI.json
+        - name: cmUMAMI
+          file: ./abis/cmUMAMI.json
+        - name: UMAMI
+          file: ./abis/UMAMI.json
+        - name: sUMAMI
+          file: ./abis/sUMAMI.json
+      eventHandlers:
+        - event: Stake(address,uint256,uint256)
+          handler: handleStake
+        - event: Withdraw(address,uint256)
+          handler: handleWithdraw
+      file: ./src/m-umami.ts

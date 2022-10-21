@@ -1,0 +1,27 @@
+type PpsEntity @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: String!
+  pricePerShare: BigDecimal!
+}
+
+type EthDistribution @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: String!
+  ethDistributed: BigDecimal!
+}
+
+type SupplyBreakdown @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  event: String!
+  txHash: String!
+  totalSupply: BigDecimal!
+  marinating: BigDecimal!
+  compounding: BigDecimal!
+  foreverLocked: BigDecimal!
+}
