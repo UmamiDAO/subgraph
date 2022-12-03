@@ -7,7 +7,11 @@ import {
 } from "../generated/cmUMAMI/cmUMAMI";
 import { mUMAMI } from "../generated/mUMAMI/mUMAMI";
 
-import { PpsEntity, SupplyBreakdown } from "../generated/schema";
+import {
+  CompoundingBalance,
+  PpsEntity,
+  SupplyBreakdown,
+} from "../generated/schema";
 import { sUMAMI } from "../generated/sUMAMI/sUMAMI";
 import { UMAMI } from "../generated/UMAMI/UMAMI";
 import {
@@ -32,8 +36,9 @@ export function handleReinvest(event: Reinvest): void {
 }
 
 export function handleDeposit(event: Deposit): void {
+  const eventLabel = "cm-umami-deposit";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
-  supplyBreakdown.event = "cm-umami-deposit";
+  supplyBreakdown.event = eventLabel;
   const UMAMIContract = UMAMI.bind(UMAMI_ADDRESS);
   const sUMAMIContract = sUMAMI.bind(S_UMAMI_ADDRESS);
   const mUMAMIContract = mUMAMI.bind(M_UMAMI_ADDRESS);
@@ -46,6 +51,27 @@ export function handleDeposit(event: Deposit): void {
   const compoundingCallResult = cmUMAMIContract.try_totalDeposits();
   const cmUmamiDecimalsCallResult = cmUMAMIContract.try_decimals();
   const sUmamiDecimalsCallResult = sUMAMIContract.try_decimals();
+
+  if (
+    event.params.amount
+      .toBigDecimal()
+      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`))
+      .gt(BigDecimal.fromString("0.1"))
+  ) {
+    const historicalBalance = new CompoundingBalance(
+      event.transaction.hash.toHex()
+    );
+    historicalBalance.event = eventLabel;
+    historicalBalance.block = event.block.number;
+    historicalBalance.timestamp = event.block.timestamp;
+    historicalBalance.user = event.transaction.from.toHexString();
+    historicalBalance.value = mUMAMIContract
+      .balanceOf(event.transaction.from)
+      .toBigDecimal()
+      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`));
+
+    historicalBalance.save();
+  }
 
   let foreverLocked = BigDecimal.zero();
   if (!umamiDecimalsCallResult.reverted && !sUmamiDecimalsCallResult.reverted) {
@@ -101,8 +127,9 @@ export function handleDeposit(event: Deposit): void {
 }
 
 export function handleWithdraw(event: Withdraw): void {
+  const eventLabel = "cm-umami-withdraw";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
-  supplyBreakdown.event = "cm-umami-withdraw";
+  supplyBreakdown.event = eventLabel;
   const UMAMIContract = UMAMI.bind(UMAMI_ADDRESS);
   const sUMAMIContract = sUMAMI.bind(S_UMAMI_ADDRESS);
   const mUMAMIContract = mUMAMI.bind(M_UMAMI_ADDRESS);
@@ -115,6 +142,27 @@ export function handleWithdraw(event: Withdraw): void {
   const compoundingCallResult = cmUMAMIContract.try_totalDeposits();
   const cmUmamiDecimalsCallResult = cmUMAMIContract.try_decimals();
   const sUmamiDecimalsCallResult = sUMAMIContract.try_decimals();
+
+  if (
+    event.params.amount
+      .toBigDecimal()
+      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`))
+      .gt(BigDecimal.fromString("0.1"))
+  ) {
+    const historicalBalance = new CompoundingBalance(
+      event.transaction.hash.toHex()
+    );
+    historicalBalance.event = eventLabel;
+    historicalBalance.block = event.block.number;
+    historicalBalance.timestamp = event.block.timestamp;
+    historicalBalance.user = event.transaction.from.toHexString();
+    historicalBalance.value = mUMAMIContract
+      .balanceOf(event.transaction.from)
+      .toBigDecimal()
+      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`));
+
+    historicalBalance.save();
+  }
 
   let foreverLocked = BigDecimal.zero();
   if (!umamiDecimalsCallResult.reverted && !sUmamiDecimalsCallResult.reverted) {

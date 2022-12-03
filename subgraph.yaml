@@ -16,6 +16,7 @@ dataSources:
       entities:
         - PpsEntity
         - SupplyBreakdown
+        - CompoundingBalance
       abis:
         - name: cmUMAMI
           file: ./abis/cmUMAMI.json
@@ -75,6 +76,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - SupplyBreakdown
+        - MarinatingBalance
       abis:
         - name: mUMAMI
           file: ./abis/mUMAMI.json
