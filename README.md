@@ -69,3 +69,46 @@ The supply is tracked on 5 events :
   }
 }
 ```
+
+## User staking history
+
+Watches the balance history of a user in the staking contracts.
+
+> To prevent registering bots trying to farm a potential Arbitrum airdrop, a 0.1 UMAMI minimum transaction amount is required to trigger the entity creation.
+
+`MarinatingBalance` and `CompoundingBalance` are the two entities tracking the balances, both are built the same way.
+
+- Event : `m-umami-deposit | m-umami-withdraw | cm-umami-deposit | cm-umami-withdraw`
+- Value : UMAMI amount carried by the transaction
+- User : the user associated with the transaction
+
+```graphql
+{
+  marinatingBalances(
+    first: 1000
+    orderBy: block
+    orderDirection: desc
+    where: { user: "user address" }
+  ) {
+    id
+    timestamp
+    block
+    user
+    event
+    value
+  }
+  compoundingBalances(
+    first: 1000
+    orderBy: block
+    orderDirection: desc
+    where: { user: "user address" }
+  ) {
+    id
+    timestamp
+    block
+    user
+    event
+    value
+  }
+}
+```
