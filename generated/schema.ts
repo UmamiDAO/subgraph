@@ -251,6 +251,58 @@ export class SupplyBreakdown extends Entity {
   }
 }
 
+export class UserBalanceTotal extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save UserBalanceTotal entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type UserBalanceTotal must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("UserBalanceTotal", id.toString(), this);
+    }
+  }
+
+  static load(id: string): UserBalanceTotal | null {
+    return changetype<UserBalanceTotal | null>(
+      store.get("UserBalanceTotal", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get marinating(): BigDecimal {
+    let value = this.get("marinating");
+    return value!.toBigDecimal();
+  }
+
+  set marinating(value: BigDecimal) {
+    this.set("marinating", Value.fromBigDecimal(value));
+  }
+
+  get compounding(): BigDecimal {
+    let value = this.get("compounding");
+    return value!.toBigDecimal();
+  }
+
+  set compounding(value: BigDecimal) {
+    this.set("compounding", Value.fromBigDecimal(value));
+  }
+}
+
 export class MarinatingBalance extends Entity {
   constructor(id: string) {
     super();
@@ -318,15 +370,6 @@ export class MarinatingBalance extends Entity {
 
   set user(value: string) {
     this.set("user", Value.fromString(value));
-  }
-
-  get event(): string {
-    let value = this.get("event");
-    return value!.toString();
-  }
-
-  set event(value: string) {
-    this.set("event", Value.fromString(value));
   }
 }
 
@@ -397,14 +440,5 @@ export class CompoundingBalance extends Entity {
 
   set user(value: string) {
     this.set("user", Value.fromString(value));
-  }
-
-  get event(): string {
-    let value = this.get("event");
-    return value!.toString();
-  }
-
-  set event(value: string) {
-    this.set("event", Value.fromString(value));
   }
 }

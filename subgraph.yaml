@@ -17,6 +17,7 @@ dataSources:
         - PpsEntity
         - SupplyBreakdown
         - CompoundingBalance
+        - UserBalanceTotal
       abis:
         - name: cmUMAMI
           file: ./abis/cmUMAMI.json
@@ -27,6 +28,8 @@ dataSources:
         - name: sUMAMI
           file: ./abis/sUMAMI.json
       eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
         - event: Reinvest(uint256,uint256)
           handler: handleReinvest
         - event: Deposit(indexed address,uint256)
@@ -77,6 +80,7 @@ dataSources:
       entities:
         - SupplyBreakdown
         - MarinatingBalance
+        - UserBalanceTotal
       abis:
         - name: mUMAMI
           file: ./abis/mUMAMI.json
@@ -87,6 +91,8 @@ dataSources:
         - name: sUMAMI
           file: ./abis/sUMAMI.json
       eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
         - event: Stake(address,uint256,uint256)
           handler: handleStake
         - event: Withdraw(address,uint256)

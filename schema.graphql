@@ -26,13 +26,18 @@ type SupplyBreakdown @entity(immutable: true) {
   foreverLocked: BigDecimal!
 }
 
+type UserBalanceTotal @entity {
+  id: ID!
+  marinating: BigDecimal!
+  compounding: BigDecimal!
+}
+
 type MarinatingBalance @entity(immutable: true) {
   id: ID!
   timestamp: BigInt!
   block: BigInt!
   value: BigDecimal!
   user: String!
-  event: String!
 }
 
 type CompoundingBalance @entity(immutable: true) {
@@ -41,5 +46,4 @@ type CompoundingBalance @entity(immutable: true) {
   block: BigInt!
   value: BigDecimal!
   user: String!
-  event: String!
 }

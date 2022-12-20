@@ -1,9 +1,10 @@
 import { BigDecimal } from "@graphprotocol/graph-ts";
 import {
   cmUMAMI,
-  Deposit,
-  Reinvest,
-  Withdraw,
+  Deposit as CompoundDeposit,
+  Reinvest as CompoundReinvest,
+  Transfer as CompoundTransfer,
+  Withdraw as CompoundWithdraw,
 } from "../generated/cmUMAMI/cmUMAMI";
 import { mUMAMI } from "../generated/mUMAMI/mUMAMI";
 
@@ -11,6 +12,7 @@ import {
   CompoundingBalance,
   PpsEntity,
   SupplyBreakdown,
+  UserBalanceTotal,
 } from "../generated/schema";
 import { sUMAMI } from "../generated/sUMAMI/sUMAMI";
 import { UMAMI } from "../generated/UMAMI/UMAMI";
@@ -22,7 +24,69 @@ import {
   UMAMI_ADDRESS,
 } from "./addresses";
 
-export function handleReinvest(event: Reinvest): void {
+const ZERO_ADDRESS: string = "0x0000000000000000000000000000000000000000";
+
+export function handleTransfer(event: CompoundTransfer): void {
+  const amount = event.params.value
+    .toBigDecimal()
+    .div(BigDecimal.fromString("1e9"));
+
+  if (amount.gt(BigDecimal.fromString("0.1"))) {
+    const from = event.params.from.toHexString();
+
+    // staking event
+    if (from != ZERO_ADDRESS) {
+      const idFromTotal = `total:${from}`;
+      let fromTotal = UserBalanceTotal.load(idFromTotal);
+      if (fromTotal == null) {
+        fromTotal = new UserBalanceTotal(idFromTotal);
+        fromTotal.marinating = BigDecimal.zero();
+        fromTotal.compounding = amount;
+      } else {
+        fromTotal.compounding = fromTotal.compounding.minus(amount);
+      }
+      fromTotal.save();
+
+      const fromHistoricalBalance = new CompoundingBalance(
+        `${event.block.number}:${from}`
+      );
+      fromHistoricalBalance.block = event.block.number;
+      fromHistoricalBalance.timestamp = event.block.timestamp;
+      fromHistoricalBalance.user = from;
+      fromHistoricalBalance.value = fromTotal.compounding;
+
+      fromHistoricalBalance.save();
+    }
+
+    const to = event.params.to.toHexString();
+
+    // unstaking event
+    if (to != ZERO_ADDRESS) {
+      const idToTotal = `total:${to}`;
+      let toTotal = UserBalanceTotal.load(idToTotal);
+      if (toTotal == null) {
+        toTotal = new UserBalanceTotal(idToTotal);
+        toTotal.marinating = BigDecimal.zero();
+        toTotal.compounding = amount;
+      } else {
+        toTotal.compounding = toTotal.compounding.plus(amount);
+      }
+      toTotal.save();
+
+      const toHistoricalBalance = new CompoundingBalance(
+        `${event.block.number}:${to}`
+      );
+      toHistoricalBalance.block = event.block.number;
+      toHistoricalBalance.timestamp = event.block.timestamp;
+      toHistoricalBalance.user = to;
+      toHistoricalBalance.value = toTotal.compounding;
+
+      toHistoricalBalance.save();
+    }
+  }
+}
+
+export function handleReinvest(event: CompoundReinvest): void {
   let ppsEntity = new PpsEntity(event.transaction.hash.toHex());
   const cmUMAMIContract = cmUMAMI.bind(event.address);
   const deposits = cmUMAMIContract.totalDeposits();
@@ -35,7 +99,7 @@ export function handleReinvest(event: Reinvest): void {
   ppsEntity.save();
 }
 
-export function handleDeposit(event: Deposit): void {
+export function handleDeposit(event: CompoundDeposit): void {
   const eventLabel = "cm-umami-deposit";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
@@ -51,27 +115,6 @@ export function handleDeposit(event: Deposit): void {
   const compoundingCallResult = cmUMAMIContract.try_totalDeposits();
   const cmUmamiDecimalsCallResult = cmUMAMIContract.try_decimals();
   const sUmamiDecimalsCallResult = sUMAMIContract.try_decimals();
-
-  if (
-    event.params.amount
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`))
-      .gt(BigDecimal.fromString("0.1"))
-  ) {
-    const historicalBalance = new CompoundingBalance(
-      event.transaction.hash.toHex()
-    );
-    historicalBalance.event = eventLabel;
-    historicalBalance.block = event.block.number;
-    historicalBalance.timestamp = event.block.timestamp;
-    historicalBalance.user = event.transaction.from.toHexString();
-    historicalBalance.value = mUMAMIContract
-      .balanceOf(event.transaction.from)
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`));
-
-    historicalBalance.save();
-  }
 
   let foreverLocked = BigDecimal.zero();
   if (!umamiDecimalsCallResult.reverted && !sUmamiDecimalsCallResult.reverted) {
@@ -126,7 +169,7 @@ export function handleDeposit(event: Deposit): void {
   supplyBreakdown.save();
 }
 
-export function handleWithdraw(event: Withdraw): void {
+export function handleWithdraw(event: CompoundWithdraw): void {
   const eventLabel = "cm-umami-withdraw";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
@@ -142,27 +185,6 @@ export function handleWithdraw(event: Withdraw): void {
   const compoundingCallResult = cmUMAMIContract.try_totalDeposits();
   const cmUmamiDecimalsCallResult = cmUMAMIContract.try_decimals();
   const sUmamiDecimalsCallResult = sUMAMIContract.try_decimals();
-
-  if (
-    event.params.amount
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`))
-      .gt(BigDecimal.fromString("0.1"))
-  ) {
-    const historicalBalance = new CompoundingBalance(
-      event.transaction.hash.toHex()
-    );
-    historicalBalance.event = eventLabel;
-    historicalBalance.block = event.block.number;
-    historicalBalance.timestamp = event.block.timestamp;
-    historicalBalance.user = event.transaction.from.toHexString();
-    historicalBalance.value = mUMAMIContract
-      .balanceOf(event.transaction.from)
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`));
-
-    historicalBalance.save();
-  }
 
   let foreverLocked = BigDecimal.zero();
   if (!umamiDecimalsCallResult.reverted && !sUmamiDecimalsCallResult.reverted) {

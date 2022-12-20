@@ -1,11 +1,16 @@
-import { BigDecimal } from "@graphprotocol/graph-ts";
+import { BigDecimal, log } from "@graphprotocol/graph-ts";
 import { cmUMAMI } from "../generated/cmUMAMI/cmUMAMI";
 import {
   mUMAMI,
-  Stake as StakeEvent,
-  Withdraw as WithdrawEvent,
+  Stake as MarinateStake,
+  Transfer as MarinateTransfer,
+  Withdraw as MarinateWithdraw,
 } from "../generated/mUMAMI/mUMAMI";
-import { MarinatingBalance, SupplyBreakdown } from "../generated/schema";
+import {
+  MarinatingBalance,
+  SupplyBreakdown,
+  UserBalanceTotal,
+} from "../generated/schema";
 import { sUMAMI } from "../generated/sUMAMI/sUMAMI";
 import { UMAMI } from "../generated/UMAMI/UMAMI";
 
@@ -17,7 +22,69 @@ import {
   UMAMI_ADDRESS,
 } from "./addresses";
 
-export function handleStake(event: StakeEvent): void {
+const ZERO_ADDRESS: string = "0x0000000000000000000000000000000000000000";
+
+export function handleTransfer(event: MarinateTransfer): void {
+  const amount = event.params.value
+    .toBigDecimal()
+    .div(BigDecimal.fromString("1e9"));
+
+  if (amount.gt(BigDecimal.fromString("0.1"))) {
+    const from = event.params.from.toHexString();
+
+    // staking event
+    if (from != ZERO_ADDRESS) {
+      const idFromTotal = `total:${from}`;
+      let fromTotal = UserBalanceTotal.load(idFromTotal);
+      if (fromTotal == null) {
+        fromTotal = new UserBalanceTotal(idFromTotal);
+        fromTotal.marinating = amount;
+        fromTotal.compounding = BigDecimal.zero();
+      } else {
+        fromTotal.marinating = fromTotal.marinating.minus(amount);
+      }
+      fromTotal.save();
+
+      const fromHistoricalBalance = new MarinatingBalance(
+        `${event.block.number}:${from}`
+      );
+      fromHistoricalBalance.block = event.block.number;
+      fromHistoricalBalance.timestamp = event.block.timestamp;
+      fromHistoricalBalance.user = from;
+      fromHistoricalBalance.value = fromTotal.marinating;
+
+      fromHistoricalBalance.save();
+    }
+
+    const to = event.params.to.toHexString();
+
+    // unstaking or compounding event
+    if (to != ZERO_ADDRESS && to != CM_UMAMI_ADDRESS.toHexString()) {
+      const idToTotal = `total:${to}`;
+      let toTotal = UserBalanceTotal.load(idToTotal);
+      if (toTotal == null) {
+        toTotal = new UserBalanceTotal(idToTotal);
+        toTotal.marinating = amount;
+        toTotal.compounding = BigDecimal.zero();
+      } else {
+        toTotal.marinating = toTotal.marinating.plus(amount);
+      }
+      toTotal.save();
+
+      const toHistoricalBalance = new MarinatingBalance(
+        `${event.block.number}:${to}`
+      );
+      toHistoricalBalance.block = event.block.number;
+      toHistoricalBalance.timestamp = event.block.timestamp;
+      toHistoricalBalance.user = to;
+      toHistoricalBalance.value = toTotal.marinating;
+
+      toHistoricalBalance.save();
+    }
+  }
+}
+
+export function handleStake(event: MarinateStake): void {
   const eventLabel = "m-umami-deposit";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
@@ -33,27 +100,6 @@ export function handleStake(event: StakeEvent): void {
   const compoundingCallResult = cmUMAMIContract.try_totalDeposits();
   const cmUmamiDecimalsCallResult = cmUMAMIContract.try_decimals();
   const sUmamiDecimalsCallResult = sUMAMIContract.try_decimals();
-
-  if (
-    event.params.amount
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`))
-      .gt(BigDecimal.fromString("0.1"))
-  ) {
-    const historicalBalance = new MarinatingBalance(
-      event.transaction.hash.toHex()
-    );
-    historicalBalance.event = eventLabel;
-    historicalBalance.block = event.block.number;
-    historicalBalance.timestamp = event.block.timestamp;
-    historicalBalance.user = event.transaction.from.toHexString();
-    historicalBalance.value = mUMAMIContract
-      .balanceOf(event.transaction.from)
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`));
-
-    historicalBalance.save();
-  }
 
   let foreverLocked = BigDecimal.zero();
   if (!umamiDecimalsCallResult.reverted && !sUmamiDecimalsCallResult.reverted) {
@@ -108,7 +154,7 @@ export function handleStake(event: StakeEvent): void {
   supplyBreakdown.save();
 }
 
-export function handleWithdraw(event: WithdrawEvent): void {
+export function handleWithdraw(event: MarinateWithdraw): void {
   const eventLabel = "m-umami-withdraw";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
@@ -124,27 +170,6 @@ export function handleWithdraw(event: WithdrawEvent): void {
   const compoundingCallResult = cmUMAMIContract.try_totalDeposits();
   const cmUmamiDecimalsCallResult = cmUMAMIContract.try_decimals();
   const sUmamiDecimalsCallResult = sUMAMIContract.try_decimals();
-
-  if (
-    event.params.amount
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`))
-      .gt(BigDecimal.fromString("0.1"))
-  ) {
-    const historicalBalance = new MarinatingBalance(
-      event.transaction.hash.toHex()
-    );
-    historicalBalance.event = eventLabel;
-    historicalBalance.block = event.block.number;
-    historicalBalance.timestamp = event.block.timestamp;
-    historicalBalance.user = event.transaction.from.toHexString();
-    historicalBalance.value = mUMAMIContract
-      .balanceOf(event.transaction.from)
-      .toBigDecimal()
-      .div(BigDecimal.fromString(`1e${umamiDecimalsCallResult.value}`));
-
-    historicalBalance.save();
-  }
 
   let foreverLocked = BigDecimal.zero();
   if (!umamiDecimalsCallResult.reverted && !sUmamiDecimalsCallResult.reverted) {

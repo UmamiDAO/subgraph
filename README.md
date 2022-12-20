@@ -78,9 +78,10 @@ Watches the balance history of a user in the staking contracts.
 
 `MarinatingBalance` and `CompoundingBalance` are the two entities tracking the balances, both are built the same way.
 
-- Event : `m-umami-deposit | m-umami-withdraw | cm-umami-deposit | cm-umami-withdraw`
 - Value : UMAMI amount carried by the transaction
 - User : the user associated with the transaction
+
+This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities from the `to` and `from` parameters.
 
 ```graphql
 {
@@ -94,9 +95,9 @@ Watches the balance history of a user in the staking contracts.
     timestamp
     block
     user
-    event
     value
   }
+
   compoundingBalances(
     first: 1000
     orderBy: block
@@ -107,7 +108,6 @@ Watches the balance history of a user in the staking contracts.
     timestamp
     block
     user
-    event
     value
   }
 }
