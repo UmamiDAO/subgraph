@@ -33,8 +33,20 @@ export function handleTransfer(event: CompoundTransfer): void {
 
   if (amount.gt(BigDecimal.fromString("0.1"))) {
     const from = event.params.from.toHexString();
+    const to = event.params.to.toHexString();
 
-    // staking event
+    // Any event not listed below is considered a transfer
+    let balanceEvent = "cm-umami-transfer";
+    // User staked his mUMAMI as cmUMAMI
+    if (from == ZERO_ADDRESS) {
+      balanceEvent = "cm-umami-deposit";
+    }
+    // User unstaked his cmUMAMI to receive mUMAMI back
+    if (to == ZERO_ADDRESS) {
+      balanceEvent = "cm-umami-withdraw";
+    }
+
+    // ZERO_ADDRESS = staking event, don't register ZERO_ADDRESS's balance
     if (from != ZERO_ADDRESS) {
       const idFromTotal = `total:${from}`;
       let fromTotal = UserBalanceTotal.load(idFromTotal);
@@ -52,15 +64,15 @@ export function handleTransfer(event: CompoundTransfer): void {
       );
       fromHistoricalBalance.block = event.block.number;
       fromHistoricalBalance.timestamp = event.block.timestamp;
+      fromHistoricalBalance.txHash = event.transaction.hash.toHex();
       fromHistoricalBalance.user = from;
       fromHistoricalBalance.value = fromTotal.compounding;
+      fromHistoricalBalance.event = balanceEvent;
 
       fromHistoricalBalance.save();
     }
 
-    const to = event.params.to.toHexString();
-
-    // unstaking event
+    // ZERO_ADDRESS = unstaking event, don't register ZERO_ADDRESS's balance
     if (to != ZERO_ADDRESS) {
       const idToTotal = `total:${to}`;
       let toTotal = UserBalanceTotal.load(idToTotal);
@@ -78,8 +90,10 @@ export function handleTransfer(event: CompoundTransfer): void {
       );
       toHistoricalBalance.block = event.block.number;
       toHistoricalBalance.timestamp = event.block.timestamp;
+      toHistoricalBalance.txHash = event.transaction.hash.toHex();
       toHistoricalBalance.user = to;
       toHistoricalBalance.value = toTotal.compounding;
+      toHistoricalBalance.event = balanceEvent;
 
       toHistoricalBalance.save();
     }

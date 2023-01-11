@@ -78,8 +78,16 @@ Watches the balance history of a user in the staking contracts.
 
 `MarinatingBalance` and `CompoundingBalance` are the two entities tracking the balances, both are built the same way.
 
-- Value : UMAMI amount carried by the transaction
+- Value : mUMAMI or cmUMAMI amount carried by the transaction
 - User : the user associated with the transaction
+- Event : The event associated with the transaction, can be one of the following
+
+`m-umami-stake` : Deposited UMAMI and received mUMAMI
+`m-umami-unstake` : Burnt mUMAMI and received UMAMI
+`m-umami-transfer` : Transfer of mUMAMI between two addresses
+`m-umami-compoumnd` & `cm-umami-deposit` : Deposited mUMAMI and received cmUMAMI
+`cm-umami-withdraw` : Burnt cmUMAMI and received mUMAMI
+`cm-umami-transfer` : Transfer of cmUMAMI between two addresses
 
 This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities from the `to` and `from` parameters.
 
@@ -94,6 +102,8 @@ This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities fro
     id
     timestamp
     block
+    txHash
+    event
     user
     value
   }
@@ -107,6 +117,8 @@ This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities fro
     id
     timestamp
     block
+    txHash
+    event
     user
     value
   }

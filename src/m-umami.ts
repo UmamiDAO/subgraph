@@ -1,4 +1,4 @@
-import { BigDecimal, log } from "@graphprotocol/graph-ts";
+import { BigDecimal } from "@graphprotocol/graph-ts";
 import { cmUMAMI } from "../generated/cmUMAMI/cmUMAMI";
 import {
   mUMAMI,
@@ -31,9 +31,26 @@ export function handleTransfer(event: MarinateTransfer): void {
 
   if (amount.gt(BigDecimal.fromString("0.1"))) {
     const from = event.params.from.toHexString();
+    const to = event.params.to.toHexString();
 
-    // staking event
+    // Any event not listed below is considered a transfer
+    let balanceEvent = "m-umami-transfer";
+    // User staked his UMAMI as mUMAMI
+    if (from == ZERO_ADDRESS) {
+      balanceEvent = "m-umami-stake";
+    }
+    // User unstaked his mUMAMI to receive UMAMI back
+    if (to == ZERO_ADDRESS) {
+      balanceEvent = "m-umami-unstake";
+    }
+    // User sent his mUMAMI to the cmUMAMI contract
+    if (to == CM_UMAMI_ADDRESS.toHexString()) {
+      balanceEvent = "m-umami-compound";
+    }
+
+    // ZERO_ADDRESS = staking event, don't register ZERO_ADDRESS's balance
     if (from != ZERO_ADDRESS) {
+      // Use "fromTotal" as a Graph variable carrying the balance changes
       const idFromTotal = `total:${from}`;
       let fromTotal = UserBalanceTotal.load(idFromTotal);
       if (fromTotal == null) {
@@ -50,16 +67,18 @@ export function handleTransfer(event: MarinateTransfer): void {
       );
       fromHistoricalBalance.block = event.block.number;
       fromHistoricalBalance.timestamp = event.block.timestamp;
+      fromHistoricalBalance.txHash = event.transaction.hash.toHex();
       fromHistoricalBalance.user = from;
       fromHistoricalBalance.value = fromTotal.marinating;
+      fromHistoricalBalance.event = balanceEvent;
 
       fromHistoricalBalance.save();
     }
 
-    const to = event.params.to.toHexString();
-
-    // unstaking or compounding event
+    // ZERO_ADDRESS = unstaking event, don't register ZERO_ADDRESS's balance
+    // CM_UMAMI_ADDRESS = compounding event, don't register CM_UMAMI_ADDRESS's balance
     if (to != ZERO_ADDRESS && to != CM_UMAMI_ADDRESS.toHexString()) {
+      // Use "toTotal" as a Graph variable carrying the balance changes
       const idToTotal = `total:${to}`;
       let toTotal = UserBalanceTotal.load(idToTotal);
       if (toTotal == null) {
@@ -76,8 +95,10 @@ export function handleTransfer(event: MarinateTransfer): void {
       );
       toHistoricalBalance.block = event.block.number;
       toHistoricalBalance.timestamp = event.block.timestamp;
+      toHistoricalBalance.txHash = event.transaction.hash.toHex();
       toHistoricalBalance.user = to;
       toHistoricalBalance.value = toTotal.marinating;
+      toHistoricalBalance.event = balanceEvent;
 
       toHistoricalBalance.save();
     }

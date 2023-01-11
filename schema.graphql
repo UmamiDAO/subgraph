@@ -36,6 +36,8 @@ type MarinatingBalance @entity(immutable: true) {
   id: ID!
   timestamp: BigInt!
   block: BigInt!
+  txHash: String!
+  event: String!
   value: BigDecimal!
   user: String!
 }
@@ -44,6 +46,8 @@ type CompoundingBalance @entity(immutable: true) {
   id: ID!
   timestamp: BigInt!
   block: BigInt!
+  txHash: String!
+  event: String!
   value: BigDecimal!
   user: String!
 }

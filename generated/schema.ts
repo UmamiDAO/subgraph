@@ -354,6 +354,15 @@ export class MarinatingBalance extends Entity {
     this.set("block", Value.fromBigInt(value));
   }
 
+  get txHash(): string {
+    let value = this.get("txHash");
+    return value!.toString();
+  }
+
+  set txHash(value: string) {
+    this.set("txHash", Value.fromString(value));
+  }
+
   get value(): BigDecimal {
     let value = this.get("value");
     return value!.toBigDecimal();
@@ -370,6 +379,15 @@ export class MarinatingBalance extends Entity {
 
   set user(value: string) {
     this.set("user", Value.fromString(value));
+  }
+
+  get event(): string {
+    let value = this.get("event");
+    return value!.toString();
+  }
+
+  set event(value: string) {
+    this.set("event", Value.fromString(value));
   }
 }
 
@@ -424,6 +442,15 @@ export class CompoundingBalance extends Entity {
     this.set("block", Value.fromBigInt(value));
   }
 
+  get txHash(): string {
+    let value = this.get("txHash");
+    return value!.toString();
+  }
+
+  set txHash(value: string) {
+    this.set("txHash", Value.fromString(value));
+  }
+
   get value(): BigDecimal {
     let value = this.get("value");
     return value!.toBigDecimal();
@@ -440,5 +467,14 @@ export class CompoundingBalance extends Entity {
 
   set user(value: string) {
     this.set("user", Value.fromString(value));
+  }
+
+  get event(): string {
+    let value = this.get("event");
+    return value!.toString();
+  }
+
+  set event(value: string) {
+    this.set("event", Value.fromString(value));
   }
 }
