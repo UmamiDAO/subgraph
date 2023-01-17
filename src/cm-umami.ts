@@ -34,6 +34,8 @@ export function handleTransfer(event: CompoundTransfer): void {
   if (amount.gt(BigDecimal.fromString("0.1"))) {
     const from = event.params.from.toHexString();
     const to = event.params.to.toHexString();
+    const idFromTotal = `total:${from}`;
+    const idToTotal = `total:${to}`;
 
     // Any event not listed below is considered a transfer
     let balanceEvent = "cm-umami-transfer";
@@ -48,7 +50,6 @@ export function handleTransfer(event: CompoundTransfer): void {
 
     // ZERO_ADDRESS = staking event, don't register ZERO_ADDRESS's balance
     if (from != ZERO_ADDRESS) {
-      const idFromTotal = `total:${from}`;
       let fromTotal = UserBalanceTotal.load(idFromTotal);
       if (fromTotal == null) {
         fromTotal = new UserBalanceTotal(idFromTotal);
@@ -74,7 +75,6 @@ export function handleTransfer(event: CompoundTransfer): void {
 
     // ZERO_ADDRESS = unstaking event, don't register ZERO_ADDRESS's balance
     if (to != ZERO_ADDRESS) {
-      const idToTotal = `total:${to}`;
       let toTotal = UserBalanceTotal.load(idToTotal);
       if (toTotal == null) {
         toTotal = new UserBalanceTotal(idToTotal);
