@@ -81,6 +81,7 @@ dataSources:
         - SupplyBreakdown
         - MarinatingBalance
         - UserBalanceTotal
+        - RewardsClaim
       abis:
         - name: mUMAMI
           file: ./abis/mUMAMI.json
@@ -97,4 +98,6 @@ dataSources:
           handler: handleStake
         - event: Withdraw(address,uint256)
           handler: handleWithdraw
+        - event: RewardClaimed(address,address,uint256)
+          handler: handleRewardsClaimed
       file: ./src/m-umami.ts

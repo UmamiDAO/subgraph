@@ -2,6 +2,7 @@ import { BigDecimal } from "@graphprotocol/graph-ts";
 import { cmUMAMI } from "../generated/cmUMAMI/cmUMAMI";
 import {
   mUMAMI,
+  RewardClaimed as RewardsClaimedEvent,
   Stake as MarinateStake,
   Transfer as MarinateTransfer,
   Withdraw as MarinateWithdraw,
@@ -10,6 +11,7 @@ import {
   MarinatingBalance,
   SupplyBreakdown,
   UserBalanceTotal,
+  RewardsClaim,
 } from "../generated/schema";
 import { sUMAMI } from "../generated/sUMAMI/sUMAMI";
 import { UMAMI } from "../generated/UMAMI/UMAMI";
@@ -34,18 +36,18 @@ export function handleTransfer(event: MarinateTransfer): void {
     const to = event.params.to.toHexString();
 
     // Any event not listed below is considered a transfer
-    let balanceEvent = "m-umami-transfer";
+    let balanceEvent = "transfer";
     // User staked his UMAMI as mUMAMI
     if (from == ZERO_ADDRESS) {
-      balanceEvent = "m-umami-stake";
+      balanceEvent = "marinate";
     }
     // User unstaked his mUMAMI to receive UMAMI back
     if (to == ZERO_ADDRESS) {
-      balanceEvent = "m-umami-unstake";
+      balanceEvent = "withdraw";
     }
     // User sent his mUMAMI to the cmUMAMI contract
     if (to == CM_UMAMI_ADDRESS.toHexString()) {
-      balanceEvent = "m-umami-compound";
+      balanceEvent = "compound";
     }
 
     // ZERO_ADDRESS = staking event, don't register ZERO_ADDRESS's balance
@@ -71,6 +73,8 @@ export function handleTransfer(event: MarinateTransfer): void {
       fromHistoricalBalance.user = from;
       fromHistoricalBalance.value = fromTotal.marinating;
       fromHistoricalBalance.event = balanceEvent;
+      fromHistoricalBalance.transferTo = balanceEvent === "transfer" ? to : "";
+      fromHistoricalBalance.transferFrom = from;
 
       fromHistoricalBalance.save();
     }
@@ -99,6 +103,9 @@ export function handleTransfer(event: MarinateTransfer): void {
       toHistoricalBalance.user = to;
       toHistoricalBalance.value = toTotal.marinating;
       toHistoricalBalance.event = balanceEvent;
+      toHistoricalBalance.transferFrom =
+        balanceEvent === "transfer" ? from : "";
+      toHistoricalBalance.transferTo = to;
 
       toHistoricalBalance.save();
     }
@@ -243,4 +250,17 @@ export function handleWithdraw(event: MarinateWithdraw): void {
   supplyBreakdown.txHash = event.transaction.hash.toHex();
 
   supplyBreakdown.save();
+}
+
+export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
+  const rewardsClaimedId = event.transaction.hash.toHex();
+  const rewardsClaimed = new RewardsClaim(rewardsClaimedId);
+  rewardsClaimed.block = event.block.number;
+  rewardsClaimed.timestamp = event.block.timestamp;
+  rewardsClaimed.txHash = event.transaction.hash.toHex();
+  rewardsClaimed.event = "claim";
+  rewardsClaimed.token = event.params.token.toHexString();
+  rewardsClaimed.user = event.params.staker.toHexString();
+  rewardsClaimed.rewards = event.params.amount;
+  rewardsClaimed.save();
 }

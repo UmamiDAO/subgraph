@@ -40,6 +40,8 @@ type MarinatingBalance @entity(immutable: true) {
   event: String!
   value: BigDecimal!
   user: String!
+  transferFrom: String!
+  transferTo: String!
 }
 
 type CompoundingBalance @entity(immutable: true) {
@@ -50,4 +52,17 @@ type CompoundingBalance @entity(immutable: true) {
   event: String!
   value: BigDecimal!
   user: String!
+  transferFrom: String!
+  transferTo: String!
+}
+
+type RewardsClaim @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  event: String!
+  user: String!
+  token: String!
+  rewards: BigInt!
 }

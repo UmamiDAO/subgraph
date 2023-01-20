@@ -38,14 +38,14 @@ export function handleTransfer(event: CompoundTransfer): void {
     const idToTotal = `total:${to}`;
 
     // Any event not listed below is considered a transfer
-    let balanceEvent = "cm-umami-transfer";
+    let balanceEvent = "transfer";
     // User staked his mUMAMI as cmUMAMI
     if (from == ZERO_ADDRESS) {
-      balanceEvent = "cm-umami-deposit";
+      balanceEvent = "compound";
     }
     // User unstaked his cmUMAMI to receive mUMAMI back
     if (to == ZERO_ADDRESS) {
-      balanceEvent = "cm-umami-withdraw";
+      balanceEvent = "withdraw";
     }
 
     // ZERO_ADDRESS = staking event, don't register ZERO_ADDRESS's balance
@@ -69,6 +69,8 @@ export function handleTransfer(event: CompoundTransfer): void {
       fromHistoricalBalance.user = from;
       fromHistoricalBalance.value = fromTotal.compounding;
       fromHistoricalBalance.event = balanceEvent;
+      fromHistoricalBalance.transferTo = balanceEvent === "transfer" ? to : "";
+      fromHistoricalBalance.transferFrom = from;
 
       fromHistoricalBalance.save();
     }
@@ -94,6 +96,9 @@ export function handleTransfer(event: CompoundTransfer): void {
       toHistoricalBalance.user = to;
       toHistoricalBalance.value = toTotal.compounding;
       toHistoricalBalance.event = balanceEvent;
+      toHistoricalBalance.transferFrom =
+        balanceEvent === "transfer" ? from : "";
+      toHistoricalBalance.transferTo = to;
 
       toHistoricalBalance.save();
     }

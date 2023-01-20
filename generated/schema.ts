@@ -363,6 +363,15 @@ export class MarinatingBalance extends Entity {
     this.set("txHash", Value.fromString(value));
   }
 
+  get event(): string {
+    let value = this.get("event");
+    return value!.toString();
+  }
+
+  set event(value: string) {
+    this.set("event", Value.fromString(value));
+  }
+
   get value(): BigDecimal {
     let value = this.get("value");
     return value!.toBigDecimal();
@@ -381,13 +390,22 @@ export class MarinatingBalance extends Entity {
     this.set("user", Value.fromString(value));
   }
 
-  get event(): string {
-    let value = this.get("event");
+  get transferFrom(): string {
+    let value = this.get("transferFrom");
     return value!.toString();
   }
 
-  set event(value: string) {
-    this.set("event", Value.fromString(value));
+  set transferFrom(value: string) {
+    this.set("transferFrom", Value.fromString(value));
+  }
+
+  get transferTo(): string {
+    let value = this.get("transferTo");
+    return value!.toString();
+  }
+
+  set transferTo(value: string) {
+    this.set("transferTo", Value.fromString(value));
   }
 }
 
@@ -451,6 +469,15 @@ export class CompoundingBalance extends Entity {
     this.set("txHash", Value.fromString(value));
   }
 
+  get event(): string {
+    let value = this.get("event");
+    return value!.toString();
+  }
+
+  set event(value: string) {
+    this.set("event", Value.fromString(value));
+  }
+
   get value(): BigDecimal {
     let value = this.get("value");
     return value!.toBigDecimal();
@@ -469,6 +496,83 @@ export class CompoundingBalance extends Entity {
     this.set("user", Value.fromString(value));
   }
 
+  get transferFrom(): string {
+    let value = this.get("transferFrom");
+    return value!.toString();
+  }
+
+  set transferFrom(value: string) {
+    this.set("transferFrom", Value.fromString(value));
+  }
+
+  get transferTo(): string {
+    let value = this.get("transferTo");
+    return value!.toString();
+  }
+
+  set transferTo(value: string) {
+    this.set("transferTo", Value.fromString(value));
+  }
+}
+
+export class RewardsClaim extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save RewardsClaim entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type RewardsClaim must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("RewardsClaim", id.toString(), this);
+    }
+  }
+
+  static load(id: string): RewardsClaim | null {
+    return changetype<RewardsClaim | null>(store.get("RewardsClaim", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value!.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get block(): BigInt {
+    let value = this.get("block");
+    return value!.toBigInt();
+  }
+
+  set block(value: BigInt) {
+    this.set("block", Value.fromBigInt(value));
+  }
+
+  get txHash(): string {
+    let value = this.get("txHash");
+    return value!.toString();
+  }
+
+  set txHash(value: string) {
+    this.set("txHash", Value.fromString(value));
+  }
+
   get event(): string {
     let value = this.get("event");
     return value!.toString();
@@ -476,5 +580,32 @@ export class CompoundingBalance extends Entity {
 
   set event(value: string) {
     this.set("event", Value.fromString(value));
+  }
+
+  get user(): string {
+    let value = this.get("user");
+    return value!.toString();
+  }
+
+  set user(value: string) {
+    this.set("user", Value.fromString(value));
+  }
+
+  get token(): string {
+    let value = this.get("token");
+    return value!.toString();
+  }
+
+  set token(value: string) {
+    this.set("token", Value.fromString(value));
+  }
+
+  get rewards(): BigInt {
+    let value = this.get("rewards");
+    return value!.toBigInt();
+  }
+
+  set rewards(value: BigInt) {
+    this.set("rewards", Value.fromBigInt(value));
   }
 }

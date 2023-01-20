@@ -70,6 +70,29 @@ The supply is tracked on 5 events :
 }
 ```
 
+## User claimed rewards
+
+Watches the `RewardClaimed` event of mUMAMI to register an user's claimed rewards transactions.
+
+```graphql
+{
+  rewardsClaims(
+    first: 1000
+    orderBy: block
+    orderDirection: desc
+    where: { user: "user address" }
+  ) {
+    id
+    timestamp
+    block
+    txHash
+    event
+    user
+    token
+    rewards
+  }
+```
+
 ## User staking history
 
 Watches the balance history of a user in the staking contracts.
@@ -82,14 +105,14 @@ Watches the balance history of a user in the staking contracts.
 - User : the user associated with the transaction
 - Event : The event associated with the transaction, can be one of the following
 
-`m-umami-stake` : Deposited UMAMI and received mUMAMI
-`m-umami-unstake` : Burnt mUMAMI and received UMAMI
-`m-umami-transfer` : Transfer of mUMAMI between two addresses
-`m-umami-compoumnd` & `cm-umami-deposit` : Deposited mUMAMI and received cmUMAMI
-`cm-umami-withdraw` : Burnt cmUMAMI and received mUMAMI
-`cm-umami-transfer` : Transfer of cmUMAMI between two addresses
+`marinate` : Deposited UMAMI and received mUMAMI
+`withdraw` : Burnt (c)mUMAMI and received (m)UMAMI
+`transfer` : Transfer of (c)mUMAMI between two addresses
+`compoumnd` : Deposited mUMAMI and received cmUMAMI
 
 This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities from the `to` and `from` parameters.
+
+`transferFrom` and `transferTo` are only present for a legitimate `transfer`.
 
 ```graphql
 {
@@ -106,6 +129,8 @@ This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities fro
     event
     user
     value
+    transferFrom
+    transferTo
   }
 
   compoundingBalances(
@@ -121,6 +146,8 @@ This tracks the `Transfer` event of both mUMAMI and cmUMAMI creates entities fro
     event
     user
     value
+    transferFrom
+    transferTo
   }
 }
 ```
