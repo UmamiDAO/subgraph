@@ -66,3 +66,12 @@ type RewardsClaim @entity(immutable: true) {
   token: String!
   rewards: BigInt!
 }
+
+type GlpWethRewardsDistributed @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  totalClaimed: BigInt!
+  amountDistributed: BigInt!
+}

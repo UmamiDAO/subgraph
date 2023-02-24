@@ -101,3 +101,23 @@ dataSources:
         - event: RewardClaimed(address,address,uint256)
           handler: handleRewardsClaimed
       file: ./src/m-umami.ts
+  - kind: ethereum
+    name: glpRewardsSafeModule
+    network: arbitrum-one
+    source:
+      address: "0x5b2fde8661c47f34c4c03f564c813d35336c2388"
+      abi: GlpRewardsSafeModule
+      startBlock: 63892103
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - GlpWethRewardsDistributed
+      abis:
+        - name: GlpRewardsSafeModule
+          file: ./abis/GlpRewardsSafeModule.json
+      eventHandlers:
+        - event: GlpWethRewardsDistributed(uint256,uint256)
+          handler: handleGlpWethRewardsDistributed
+      file: ./src/glp-rewards-safe-module.ts

@@ -609,3 +609,85 @@ export class RewardsClaim extends Entity {
     this.set("rewards", Value.fromBigInt(value));
   }
 }
+
+export class GlpWethRewardsDistributed extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id != null,
+      "Cannot save GlpWethRewardsDistributed entity without an ID"
+    );
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type GlpWethRewardsDistributed must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("GlpWethRewardsDistributed", id.toString(), this);
+    }
+  }
+
+  static load(id: string): GlpWethRewardsDistributed | null {
+    return changetype<GlpWethRewardsDistributed | null>(
+      store.get("GlpWethRewardsDistributed", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value!.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get block(): BigInt {
+    let value = this.get("block");
+    return value!.toBigInt();
+  }
+
+  set block(value: BigInt) {
+    this.set("block", Value.fromBigInt(value));
+  }
+
+  get txHash(): string {
+    let value = this.get("txHash");
+    return value!.toString();
+  }
+
+  set txHash(value: string) {
+    this.set("txHash", Value.fromString(value));
+  }
+
+  get totalClaimed(): BigInt {
+    let value = this.get("totalClaimed");
+    return value!.toBigInt();
+  }
+
+  set totalClaimed(value: BigInt) {
+    this.set("totalClaimed", Value.fromBigInt(value));
+  }
+
+  get amountDistributed(): BigInt {
+    let value = this.get("amountDistributed");
+    return value!.toBigInt();
+  }
+
+  set amountDistributed(value: BigInt) {
+    this.set("amountDistributed", Value.fromBigInt(value));
+  }
+}
