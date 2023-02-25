@@ -52,7 +52,8 @@ Since permisionless claim and distribution has been enabled via a Safe module, a
     block
     timestamp
     txHash
-    txHash
+    totalClaimed
+    amountDistributed
   }
 }
 ```
