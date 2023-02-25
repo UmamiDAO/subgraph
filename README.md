@@ -1,6 +1,6 @@
-# Umami Finance subgraph
+# Umami DAO subgraph
 
-This subgraphs indexes UMAMI Finance contracts.
+This subgraphs indexes UMAMI DAO contracts.
 
 - [Graph URL](https://thegraph.com/hosted-service/subgraph/umamidao/protocol-metrics)
 - [Graph API URL](https://api.thegraph.com/subgraphs/name/umamidao/protocol-metrics)
@@ -25,7 +25,7 @@ Watches the cmUMAMI:UMAMI ratio on each `Reinvest` event triggered by the compou
 
 ## ETH staking distribution
 
-Watches the ETH amount distributed to stakers on each `RewardAdded` event triggered by the reward receiver contract.
+Watches the ETH amount distributed to stakers on each `RewardAdded` event triggered by the mUMAMI contract.
 
 ```graphql
 {
@@ -35,6 +35,24 @@ Watches the ETH amount distributed to stakers on each `RewardAdded` event trigge
     timestamp
     txHash
     ethDistributed
+  }
+}
+```
+
+Since permisionless claim and distribution has been enabled via a Safe module, another event has been added to keep track of claims and distribution.
+
+```graphql
+{
+  glpWethRewardsDistributeds(
+    first: 1000
+    orderBy: block
+    orderDirection: desc
+  ) {
+    id
+    block
+    timestamp
+    txHash
+    txHash
   }
 }
 ```
