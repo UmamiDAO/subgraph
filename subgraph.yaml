@@ -16,6 +16,8 @@ dataSources:
       entities:
         - PpsEntity
         - SupplyBreakdown
+        - CompoundingBalance
+        - UserBalanceTotal
       abis:
         - name: cmUMAMI
           file: ./abis/cmUMAMI.json
@@ -26,6 +28,8 @@ dataSources:
         - name: sUMAMI
           file: ./abis/sUMAMI.json
       eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
         - event: Reinvest(uint256,uint256)
           handler: handleReinvest
         - event: Deposit(indexed address,uint256)
@@ -33,35 +37,6 @@ dataSources:
         - event: Withdraw(indexed address,uint256)
           handler: handleWithdraw
       file: ./src/cm-umami.ts
-  - kind: ethereum
-    name: marinateReceiver
-    network: arbitrum-one
-    source:
-      address: "0x9491300D42f9b1929DF4c1A3308F68A482B91A30"
-      abi: marinateReceiver
-      startBlock: 7670244
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.6
-      language: wasm/assemblyscript
-      entities:
-        - EthDistribution
-        - SupplyBreakdown
-      abis:
-        - name: marinateReceiver
-          file: ./abis/marinateReceiver.json
-        - name: cmUMAMI
-          file: ./abis/cmUMAMI.json
-        - name: UMAMI
-          file: ./abis/UMAMI.json
-        - name: mUMAMI
-          file: ./abis/mUMAMI.json
-        - name: sUMAMI
-          file: ./abis/sUMAMI.json
-      eventHandlers:
-        - event: RewardAdded(address,uint256)
-          handler: handleRewardAdded
-      file: ./src/marinate-receiver.ts
   - kind: ethereum
     name: mUMAMI
     network: arbitrum-one
@@ -75,6 +50,10 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - SupplyBreakdown
+        - MarinatingBalance
+        - UserBalanceTotal
+        - RewardsClaim
+        - EthDistribution
       abis:
         - name: mUMAMI
           file: ./abis/mUMAMI.json
@@ -85,8 +64,34 @@ dataSources:
         - name: sUMAMI
           file: ./abis/sUMAMI.json
       eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
         - event: Stake(address,uint256,uint256)
           handler: handleStake
         - event: Withdraw(address,uint256)
           handler: handleWithdraw
+        - event: RewardClaimed(address,address,uint256)
+          handler: handleRewardsClaimed
+        - event: RewardAdded(address,uint256,uint256)
+          handler: handleRewardsAdded
       file: ./src/m-umami.ts
+  - kind: ethereum
+    name: glpRewardsSafeModule
+    network: arbitrum-one
+    source:
+      address: "0x5b2fde8661c47f34c4c03f564c813d35336c2388"
+      abi: GlpRewardsSafeModule
+      startBlock: 63892103
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - GlpWethRewardsDistributed
+      abis:
+        - name: GlpRewardsSafeModule
+          file: ./abis/GlpRewardsSafeModule.json
+      eventHandlers:
+        - event: GlpWethRewardsDistributed(uint256,uint256)
+          handler: handleGlpWethRewardsDistributed
+      file: ./src/glp-rewards-safe-module.ts

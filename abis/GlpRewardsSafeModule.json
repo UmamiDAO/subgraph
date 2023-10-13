@@ -1,0 +1,119 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" },
+      {
+        "internalType": "contract GnosisSafe",
+        "name": "_delegator",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "ApprovalFailed", "type": "error" },
+  { "inputs": [], "name": "InvalidBps", "type": "error" },
+  { "inputs": [], "name": "OnlyMarinateLocked", "type": "error" },
+  { "inputs": [], "name": "OnlyNotPaused", "type": "error" },
+  { "inputs": [], "name": "OnlyOwner", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_totalClaimed",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amountDistributed",
+        "type": "uint256"
+      }
+    ],
+    "name": "GlpWethRewardsDistributed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_oldShareBps",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_newShareBps",
+        "type": "uint256"
+      }
+    ],
+    "name": "MarinateShareBpsUpdated",
+    "type": "event"
+  },
+  { "anonymous": false, "inputs": [], "name": "Paused", "type": "event" },
+  { "anonymous": false, "inputs": [], "name": "Unpaused", "type": "event" },
+  {
+    "inputs": [],
+    "name": "DELEGATOR",
+    "outputs": [
+      { "internalType": "contract GnosisSafe", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "OWNER",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "distribute",
+    "outputs": [
+      { "internalType": "uint256", "name": "_totalClaimed", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "_amountDistributed",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isPaused",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "marinateShareBps",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bool", "name": "_isPaused", "type": "bool" }],
+    "name": "setIsPaused",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_newBps", "type": "uint256" }
+    ],
+    "name": "setMarinateShareBps",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

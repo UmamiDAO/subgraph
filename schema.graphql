@@ -6,11 +6,20 @@ type PpsEntity @entity(immutable: true) {
   pricePerShare: BigDecimal!
 }
 
+type CompoundingPricePerShare @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: String!
+  pricePerShare: BigDecimal!
+}
+
 type EthDistribution @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
   txHash: String!
+  from: String!
   ethDistributed: BigDecimal!
 }
 
@@ -24,4 +33,67 @@ type SupplyBreakdown @entity(immutable: true) {
   marinating: BigDecimal!
   compounding: BigDecimal!
   foreverLocked: BigDecimal!
+}
+
+type UserBalanceEvent @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  event: String!
+  token: String!
+  amount: BigInt!
+  user: String!
+  from: String!
+  to: String!
+}
+
+type UserBalanceTotal @entity {
+  id: ID!
+  marinating: BigDecimal!
+  compounding: BigDecimal!
+}
+
+type MarinatingBalance @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  event: String!
+  value: BigDecimal!
+  user: String!
+  transferFrom: String!
+  transferTo: String!
+}
+
+type CompoundingBalance @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  event: String!
+  value: BigDecimal!
+  user: String!
+  transferFrom: String!
+  transferTo: String!
+}
+
+type RewardsClaim @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  event: String!
+  user: String!
+  token: String!
+  rewards: BigInt!
+}
+
+type GlpWethRewardsDistributed @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  totalClaimed: BigInt!
+  amountDistributed: BigInt!
 }
