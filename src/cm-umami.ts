@@ -10,8 +10,10 @@ import { mUMAMI } from "../generated/mUMAMI/mUMAMI";
 
 import {
   CompoundingBalance,
+  CompoundingPricePerShare,
   PpsEntity,
   SupplyBreakdown,
+  UserBalanceEvent,
   UserBalanceTotal,
 } from "../generated/schema";
 import { sUMAMI } from "../generated/sUMAMI/sUMAMI";
@@ -106,10 +108,22 @@ export function handleTransfer(event: CompoundTransfer): void {
 }
 
 export function handleReinvest(event: CompoundReinvest): void {
-  let ppsEntity = new PpsEntity(event.transaction.hash.toHex());
+  const ppsEntity = new PpsEntity(event.transaction.hash.toHex());
+  const compoundingPricePerShare = new CompoundingPricePerShare(
+    event.transaction.hash.toHex()
+  );
+
   const cmUMAMIContract = cmUMAMI.bind(event.address);
   const deposits = cmUMAMIContract.totalDeposits();
   const supply = cmUMAMIContract.totalSupply();
+
+  compoundingPricePerShare.block = event.block.number;
+  compoundingPricePerShare.timestamp = event.block.timestamp;
+  compoundingPricePerShare.txHash = event.transaction.hash.toHex();
+  compoundingPricePerShare.pricePerShare = deposits
+    .toBigDecimal()
+    .div(supply.toBigDecimal());
+  compoundingPricePerShare.save();
 
   ppsEntity.block = event.block.number;
   ppsEntity.timestamp = event.block.timestamp;
@@ -120,8 +134,21 @@ export function handleReinvest(event: CompoundReinvest): void {
 
 export function handleDeposit(event: CompoundDeposit): void {
   const eventLabel = "cm-umami-deposit";
-  let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
+  const supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
+  const userBalanceEvent = new UserBalanceEvent(event.transaction.hash.toHex());
+
+  userBalanceEvent.block = event.block.number;
+  userBalanceEvent.timestamp = event.block.timestamp;
+  userBalanceEvent.txHash = event.transaction.hash.toHexString();
+  userBalanceEvent.event = "deposit";
+  userBalanceEvent.token = CM_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.user = event.params.account.toHexString();
+  userBalanceEvent.amount = event.params.amount;
+  userBalanceEvent.from = event.params.account.toHexString();
+  userBalanceEvent.to = CM_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.save();
+
   const UMAMIContract = UMAMI.bind(UMAMI_ADDRESS);
   const sUMAMIContract = sUMAMI.bind(S_UMAMI_ADDRESS);
   const mUMAMIContract = mUMAMI.bind(M_UMAMI_ADDRESS);
@@ -192,6 +219,19 @@ export function handleWithdraw(event: CompoundWithdraw): void {
   const eventLabel = "cm-umami-withdraw";
   let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
+  const userBalanceEvent = new UserBalanceEvent(event.transaction.hash.toHex());
+
+  userBalanceEvent.block = event.block.number;
+  userBalanceEvent.timestamp = event.block.timestamp;
+  userBalanceEvent.txHash = event.transaction.hash.toHexString();
+  userBalanceEvent.event = "withdraw";
+  userBalanceEvent.token = CM_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.user = event.params.account.toHexString();
+  userBalanceEvent.amount = event.params.amount;
+  userBalanceEvent.from = CM_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.to = event.params.account.toHexString();
+  userBalanceEvent.save();
+
   const UMAMIContract = UMAMI.bind(UMAMI_ADDRESS);
   const sUMAMIContract = sUMAMI.bind(S_UMAMI_ADDRESS);
   const mUMAMIContract = mUMAMI.bind(M_UMAMI_ADDRESS);

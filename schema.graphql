@@ -6,11 +6,20 @@ type PpsEntity @entity(immutable: true) {
   pricePerShare: BigDecimal!
 }
 
+type CompoundingPricePerShare @entity(immutable: true) {
+  id: ID!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: String!
+  pricePerShare: BigDecimal!
+}
+
 type EthDistribution @entity(immutable: true) {
   id: ID!
   block: BigInt!
   timestamp: BigInt!
   txHash: String!
+  from: String!
   ethDistributed: BigDecimal!
 }
 
@@ -24,6 +33,19 @@ type SupplyBreakdown @entity(immutable: true) {
   marinating: BigDecimal!
   compounding: BigDecimal!
   foreverLocked: BigDecimal!
+}
+
+type UserBalanceEvent @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  event: String!
+  token: String!
+  amount: BigInt!
+  user: String!
+  from: String!
+  to: String!
 }
 
 type UserBalanceTotal @entity {

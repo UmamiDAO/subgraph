@@ -14,6 +14,7 @@ import {
   UserBalanceTotal,
   RewardsClaim,
   EthDistribution,
+  UserBalanceEvent,
 } from "../generated/schema";
 import { sUMAMI } from "../generated/sUMAMI/sUMAMI";
 import { UMAMI } from "../generated/UMAMI/UMAMI";
@@ -116,8 +117,21 @@ export function handleTransfer(event: MarinateTransfer): void {
 
 export function handleStake(event: MarinateStake): void {
   const eventLabel = "m-umami-deposit";
-  let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
+  const supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
+  const userBalanceEvent = new UserBalanceEvent(event.transaction.hash.toHex());
+
+  userBalanceEvent.block = event.block.number;
+  userBalanceEvent.timestamp = event.block.timestamp;
+  userBalanceEvent.txHash = event.transaction.hash.toHexString();
+  userBalanceEvent.event = "deposit";
+  userBalanceEvent.token = M_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.user = event.params.addr.toHexString();
+  userBalanceEvent.amount = event.params.amount;
+  userBalanceEvent.from = event.params.addr.toHexString();
+  userBalanceEvent.to = M_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.save();
+
   const UMAMIContract = UMAMI.bind(UMAMI_ADDRESS);
   const sUMAMIContract = sUMAMI.bind(S_UMAMI_ADDRESS);
   const mUMAMIContract = mUMAMI.bind(M_UMAMI_ADDRESS);
@@ -186,8 +200,21 @@ export function handleStake(event: MarinateStake): void {
 
 export function handleWithdraw(event: MarinateWithdraw): void {
   const eventLabel = "m-umami-withdraw";
-  let supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
+  const supplyBreakdown = new SupplyBreakdown(event.transaction.hash.toHex());
   supplyBreakdown.event = eventLabel;
+  const userBalanceEvent = new UserBalanceEvent(event.transaction.hash.toHex());
+
+  userBalanceEvent.block = event.block.number;
+  userBalanceEvent.timestamp = event.block.timestamp;
+  userBalanceEvent.txHash = event.transaction.hash.toHexString();
+  userBalanceEvent.event = "withdraw";
+  userBalanceEvent.token = M_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.user = event.params.addr.toHexString();
+  userBalanceEvent.amount = event.params.amount;
+  userBalanceEvent.from = M_UMAMI_ADDRESS.toHexString();
+  userBalanceEvent.to = event.params.addr.toHexString();
+  userBalanceEvent.save();
+
   const UMAMIContract = UMAMI.bind(UMAMI_ADDRESS);
   const sUMAMIContract = sUMAMI.bind(S_UMAMI_ADDRESS);
   const mUMAMIContract = mUMAMI.bind(M_UMAMI_ADDRESS);
@@ -272,6 +299,8 @@ export function handleRewardsAdded(event: RewardAdded): void {
   ethDistribution.block = event.block.number;
   ethDistribution.timestamp = event.block.timestamp;
   ethDistribution.txHash = event.transaction.hash.toHex();
+  ethDistribution.from = event.transaction.from.toHex();
+
   ethDistribution.ethDistributed = event.params.amount
     .toBigDecimal()
     .div(BigDecimal.fromString("1e18"));
