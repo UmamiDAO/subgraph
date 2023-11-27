@@ -95,3 +95,29 @@ dataSources:
         - event: GlpWethRewardsDistributed(uint256,uint256)
           handler: handleGlpWethRewardsDistributed
       file: ./src/glp-rewards-safe-module.ts
+  - kind: ethereum
+    name: oArbVester
+    network: arbitrum-one
+    source:
+      address: "0xc442cdf1178dca7053c540d558f6a0596794ec06"
+      abi: oArbVester
+      startBlock: 149379332
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - oArbVestingEvent
+        - PositionClosedEvent
+        - EmergencyWithdrawEvent
+      abis:
+        - name: oArbVester
+          file: ./abis/oArbVester.json
+      eventHandlers:
+        - event: Vesting(indexed address,uint256,uint256,uint256)
+          handler: handleoArbVesting
+        - event: PositionClosed(indexed address,uint256)
+          handler: handleoArbPositionClosed
+        - event: EmergencyWithdraw(indexed address,uint256)
+          handler: handleoArbEmergencyWithdraw
+      file: ./src/o-arb.ts

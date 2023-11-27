@@ -97,3 +97,32 @@ type GlpWethRewardsDistributed @entity(immutable: true) {
   totalClaimed: BigInt!
   amountDistributed: BigInt!
 }
+
+type oArbVestingEvent @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  user: String!
+  amount: BigInt!
+  duration: BigInt!
+  nftId: BigInt!
+}
+
+type PositionClosedEvent @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  user: String!
+  nftId: BigInt!
+}
+
+type EmergencyWithdrawEvent @entity(immutable: true) {
+  id: ID!
+  timestamp: BigInt!
+  block: BigInt!
+  txHash: String!
+  user: String!
+  nftId: BigInt!
+}
